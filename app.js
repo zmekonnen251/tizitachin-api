@@ -15,21 +15,18 @@ dotenv.config();
 
 const app = express();
 
-// const corsOptions = {
-// 	origin: ['*'],
-// 	optionSuccessStatus: 200,
-// 	credentials: true,
-// };
+const corsOptions = {
+	origin: ['*'],
+	optionSuccessStatus: 200,
+	credentials: true,
+};
 
 if (process.env.NODE_ENV === 'development') {
 	app.use(morgan('dev'));
 }
 
 app.use(
-	cors({
-		origin: 'https://tizitachin-client.onrender.com/',
-		credentials: true,
-	})
+	cors(corsOptions)
 );
 app.use(credentials);
 
