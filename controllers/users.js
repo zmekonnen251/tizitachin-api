@@ -72,14 +72,14 @@ export const signin = async (req, res) => {
 		res.cookie('jwt', refreshToken, {
 			httpOnly: true,
 			secure: true,
-			domain: 'tizitachin-client.onrender.com',
+
 			sameSite: 'None',
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		});
 
 		res.cookie('access-token', accessToken, {
 			secure: true,
-			domain: 'tizitachin-client.onrender.com',
+
 			sameSite: 'None',
 			maxAge: 15 * 60 * 1000,
 		});
@@ -165,7 +165,7 @@ export const googleSignin = async (req, res) => {
 
 			res.cookie('jwt', refreshToken, {
 				httpOnly: true,
-				domain: 'tizitachin-client.onrender.com',
+
 				sameSite: 'None',
 				secure: true,
 			});
@@ -174,7 +174,6 @@ export const googleSignin = async (req, res) => {
 				maxAge: 15 * 60 * 1000,
 				sameSite: 'None',
 				secure: true,
-				domain: 'tizitachin-client.onrender.com',
 			});
 
 			res.status(200).json({
@@ -207,7 +206,7 @@ export const googleSignin = async (req, res) => {
 
 			res.cookie('jwt', refreshToken, {
 				httpOnly: true,
-				domain: 'tizitachin-client.onrender.com',
+
 				sameSite: 'None',
 				secure: true,
 			});
@@ -216,7 +215,6 @@ export const googleSignin = async (req, res) => {
 				maxAge: 15 * 60 * 1000,
 				sameSite: 'None',
 				secure: true,
-				domain: 'tizitachin-client.onrender.com',
 			});
 
 			res.status(200).json({
@@ -340,7 +338,6 @@ export const protect = async (req, res, next) => {
 							sameSite: 'None',
 							secure: true,
 							maxAge: 15 * 60 * 1000,
-							domain: 'tizitachin-client.onrender.com',
 						});
 
 						res.status(200).json({
