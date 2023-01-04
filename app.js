@@ -19,6 +19,7 @@ const corsOptions = {
 	origin: allowedOrigins,
 	optionSuccessStatus: 200,
 	credentials: true,
+	allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 if (process.env.NODE_ENV === 'development') {
