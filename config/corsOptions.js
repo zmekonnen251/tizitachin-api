@@ -14,6 +14,7 @@ export const allowedOrigins = [
 	'http://127.0.0.1:3001',
 	'http://127.0.0.1:8080',
 	'https://tizitachin-client.onrender.com',
+	'https://tizitachin-api.onrender.com/',
 ];
 
 export default {
