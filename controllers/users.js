@@ -358,7 +358,7 @@ export const verifyEmail = async (req, res) => {
 
 export const protect = async (req, res, next) => {
 	const refreshToken = req.cookies['jwt'];
-	const accessToken = req.cookies['access-token'];
+	const accessToken = req.headers.authorization.split(' ')[1];
 
 	if (!refreshToken || !accessToken) {
 		return res.status(401).json({ message: 'Unauthorized' });
