@@ -357,12 +357,17 @@ export const verifyEmail = async (req, res) => {
 };
 
 export const protect = async (req, res, next) => {
+	console.log(req.cookies);
+	console.log(req.headers.authorization);
 	const refreshToken = req.cookies['jwt'];
-	let accessToken=''
-	if(req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer'))
+	let accessToken = '';
+	if (
+		req.headers.authorization &&
+		req.headers.authorization.startsWith('Bearer')
+	) {
 		accessToken = req.headers.authorization.split(' ')[1];
-
+		console.log(accessToken);
+	}
 	if (!refreshToken || !accessToken) {
 		return res.status(401).json({ message: 'Unauthorized' });
 	}
