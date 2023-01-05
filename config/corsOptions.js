@@ -9,11 +9,9 @@ export default {
 	// 	}
 	// },
 	origin: [
-		[
-			'https://tizitachin-client.onrender.com',
-			'https://tizitachin.netlify.app',
-			undefined,
-		],
+		'https://tizitachin-client.onrender.com',
+		'https://tizitachin.netlify.app',
+		undefined,
 	],
 	credentials: true,
 	optionsSuccessStatus: 200,
