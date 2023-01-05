@@ -8,12 +8,7 @@ export default {
 	// 		callback(new Error('Not allowed by CORS'));
 	// 	}
 	// },
-	origin: [
-		'http://localhost:3000',
-		'https://tizitachin-client.onrender.com',
-		'https://tizitachin.netlify.app',
-		undefined,
-	],
+	origin: ['*'],
 	credentials: true,
 	optionsSuccessStatus: 200,
 };
