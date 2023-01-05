@@ -73,14 +73,14 @@ export const signin = async (req, res) => {
 			httpOnly: true,
 			secure: true,
 
-			sameSite: 'none',
+			sameSite: 'None',
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		});
 
 		res.cookie('access-token', accessToken, {
 			secure: true,
 
-			sameSite: 'none',
+			sameSite: 'None',
 			maxAge: 15 * 60 * 1000,
 		});
 
@@ -166,13 +166,13 @@ export const googleSignin = async (req, res) => {
 			res.cookie('jwt', refreshToken, {
 				httpOnly: true,
 
-				sameSite: 'none',
+				sameSite: 'None',
 				secure: true,
 			});
 
 			res.cookie('access-token', accessToken, {
 				maxAge: 15 * 60 * 1000,
-				sameSite: 'none',
+				sameSite: 'None',
 				secure: true,
 			});
 
@@ -207,13 +207,13 @@ export const googleSignin = async (req, res) => {
 			res.cookie('jwt', refreshToken, {
 				httpOnly: true,
 
-				sameSite: 'none',
+				sameSite: 'None',
 				secure: true,
 			});
 
 			res.cookie('access-token', accessToken, {
 				maxAge: 15 * 60 * 1000,
-				sameSite: 'none',
+				sameSite: 'None',
 				secure: true,
 			});
 
@@ -335,7 +335,7 @@ export const protect = async (req, res, next) => {
 						req.userId = decodedUser._id;
 
 						res.cookie('access-token', newAccessToken, {
-							sameSite: 'none',
+							sameSite: 'None',
 							secure: true,
 							maxAge: 15 * 60 * 1000,
 						});
