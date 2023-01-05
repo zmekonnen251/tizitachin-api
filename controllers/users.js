@@ -27,26 +27,26 @@ export const signin = async (req, res) => {
 		if (!isPasswordCorrect)
 			return res.status(400).json({ message: 'Invalid credentials' });
 
-		if (!oldUser.verified) {
-			const token = await Token.findOne({ userId: oldUser._id });
+		// if (!oldUser.verified) {
+		// 	const token = await Token.findOne({ userId: oldUser._id });
 
-			if (!token) {
-				const newToken = new Token({
-					userId: oldUser._id,
-					token: crypto.randomBytes(16).toString('hex'),
-				}).save();
+		// 	if (!token) {
+		// 		const newToken = new Token({
+		// 			userId: oldUser._id,
+		// 			token: crypto.randomBytes(16).toString('hex'),
+		// 		}).save();
 
-				const url = `${process.env.FRONT_END_URL}/user/${oldUser._id}/confirmation/${newToken.token}`;
-				await new Email(oldUser, url).sendEmailVerification();
+		// 		const url = `${process.env.FRONT_END_URL}/user/${oldUser._id}/confirmation/${newToken.token}`;
+		// 		await new Email(oldUser, url).sendEmailVerification();
 
-				return res.status(200).json({
-					message:
-						'An email has been sent to you. Please verify your account to login.',
-				});
-			}
+		// 		return res.status(200).json({
+		// 			message:
+		// 				'An email has been sent to you. Please verify your account to login.',
+		// 		});
+		// 	}
 
-			return res.status(400).json({ message: 'Please verify your email' });
-		}
+		// 	return res.status(400).json({ message: 'Please verify your email' });
+		// }
 
 		const accessToken = generateAccessToken({
 			email: oldUser.email,
@@ -68,7 +68,6 @@ export const signin = async (req, res) => {
 				new: true,
 			}
 		);
-		res.headers.authorization = `Bearer ${accessToken}`;
 
 		res.cookie('jwt', refreshToken, {
 			httpOnly: true,
@@ -91,6 +90,7 @@ export const signin = async (req, res) => {
 				_id: oldUser._id,
 				imageUrl: oldUser.imageUrl,
 			},
+			accessToken,
 		});
 	} catch (error) {
 		res.status(500).json({ message: 'Something went wrong' });
@@ -124,12 +124,58 @@ export const signup = async (req, res) => {
 			token: crypto.randomBytes(16).toString('hex'),
 		});
 
-		const url = `${process.env.FRONT_END_URL}/users/${result._id}/confirmation/${token.token}`;
+		// const url = `${process.env.FRONT_END_URL}/users/${result._id}/confirmation/${token.token}`;
+		const url = '';
 
-		await new Email(result, url).sendEmailVerification();
+		await new Email(result, url).sendWelcome();
+
+		// res.status(200).json({
+		// 	message: 'An email has been sent to you. Please verify your account',
+		// });
+
+		const accessToken = generateAccessToken({
+			email: result.email,
+			name: result.name,
+			imageUrl: result.imageUrl,
+			_id: result._id,
+		});
+		const refreshToken = generateRefreshToken({
+			email: result.email,
+			_id: result._id,
+		});
+
+		await User.findByIdAndUpdate(
+			result._id,
+			{
+				refreshToken: refreshToken,
+			},
+			{
+				new: true,
+			}
+		);
+
+		res.cookie('jwt', refreshToken, {
+			httpOnly: true,
+			secure: true,
+			sameSite: 'None',
+			maxAge: 7 * 24 * 60 * 60 * 1000,
+		});
+
+		res.cookie('access-token', accessToken, {
+			httpOnly: false,
+			secure: true,
+			sameSite: 'None',
+			maxAge: 15 * 60 * 1000,
+		});
 
 		res.status(200).json({
-			message: 'An email has been sent to you. Please verify your account',
+			user: {
+				name: result.name,
+				email: result.email,
+				_id: result._id,
+				imageUrl: result.imageUrl,
+			},
+			accessToken,
 		});
 	} catch (error) {
 		res.status(500).json({ message: 'Something went wrong' });
@@ -184,6 +230,7 @@ export const googleSignin = async (req, res) => {
 					_id: user._id,
 					imageUrl: user.imageUrl,
 				},
+				accessToken,
 			});
 		} else {
 			const password = email + process.env.GOOGLE_CLIENT_ID;
@@ -226,6 +273,7 @@ export const googleSignin = async (req, res) => {
 					_id: user._id,
 					imageUrl: user.imageUrl,
 				},
+				accessToken,
 			});
 		}
 	}
