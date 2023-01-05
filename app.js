@@ -5,8 +5,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import cookieParser from 'cookie-parser';
-// import corsOptions from './config/corsOptions.js';
-import { allowedOrigins } from './config/corsOptions.js';
+import corsOptions from './config/corsOptions.js';
+// import { allowedOrigins } from './config/corsOptions.js';
 import postRoutes from './routes/posts.js';
 import userRoutes from './routes/users.js';
 import credentials from './middleware/credentials.js';
@@ -14,13 +14,6 @@ import credentials from './middleware/credentials.js';
 dotenv.config();
 
 const app = express();
-
-const corsOptions = {
-	origin: allowedOrigins,
-	optionSuccessStatus: 200,
-	credentials: true,
-	allowedHeaders: ['Content-Type', 'Authorization'],
-};
 
 if (process.env.NODE_ENV === 'development') {
 	app.use(morgan('dev'));
