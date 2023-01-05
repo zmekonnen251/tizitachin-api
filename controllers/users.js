@@ -68,7 +68,7 @@ export const signin = async (req, res) => {
 				new: true,
 			}
 		);
-		req.headers.authorization = `Bearer ${accessToken}`;
+		res.headers.authorization = `Bearer ${accessToken}`;
 
 		res.cookie('jwt', refreshToken, {
 			httpOnly: true,
