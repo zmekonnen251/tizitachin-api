@@ -72,14 +72,13 @@ export const signin = async (req, res) => {
 		res.cookie('jwt', refreshToken, {
 			httpOnly: true,
 			secure: true,
-
 			sameSite: 'None',
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		});
 
 		res.cookie('access-token', accessToken, {
+			httpOnly: false,
 			secure: true,
-
 			sameSite: 'None',
 			maxAge: 15 * 60 * 1000,
 		});
@@ -165,15 +164,16 @@ export const googleSignin = async (req, res) => {
 
 			res.cookie('jwt', refreshToken, {
 				httpOnly: true,
-
-				sameSite: 'None',
 				secure: true,
+				sameSite: 'None',
+				maxAge: 7 * 24 * 60 * 60 * 1000,
 			});
 
 			res.cookie('access-token', accessToken, {
-				maxAge: 15 * 60 * 1000,
-				sameSite: 'None',
+				httpOnly: false,
 				secure: true,
+				sameSite: 'None',
+				maxAge: 15 * 60 * 1000,
 			});
 
 			res.status(200).json({
@@ -206,15 +206,16 @@ export const googleSignin = async (req, res) => {
 
 			res.cookie('jwt', refreshToken, {
 				httpOnly: true,
-
-				sameSite: 'None',
 				secure: true,
+				sameSite: 'None',
+				maxAge: 7 * 24 * 60 * 60 * 1000,
 			});
 
 			res.cookie('access-token', accessToken, {
-				maxAge: 15 * 60 * 1000,
-				sameSite: 'None',
+				httpOnly: false,
 				secure: true,
+				sameSite: 'None',
+				maxAge: 15 * 60 * 1000,
 			});
 
 			res.status(200).json({
@@ -255,8 +256,20 @@ export const signout = async (req, res) => {
 				{ refreshToken: '' },
 				{ new: true }
 			);
-			res.clearCookie('jwt');
-			res.clearCookie('access-token');
+
+			res.clearCookie('jwt', {
+				httpOnly: true,
+				sameSite: 'None',
+				secure: true,
+			});
+
+			res.clearCookie('access-token', {
+				httpOnly: false,
+				sameSite: 'None',
+				secure: true,
+			});
+			// res.clearCookie('jwt');
+			// res.clearCookie('access-token');
 			// res.cookie('jwt', 'loggedout');
 			// res.cookie('access-token', 'loggedout');
 
@@ -335,8 +348,9 @@ export const protect = async (req, res, next) => {
 						req.userId = decodedUser._id;
 
 						res.cookie('access-token', newAccessToken, {
-							sameSite: 'None',
+							httpOnly: false,
 							secure: true,
+							sameSite: 'None',
 							maxAge: 15 * 60 * 1000,
 						});
 

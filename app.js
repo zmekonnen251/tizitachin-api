@@ -3,10 +3,10 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
-
 import cookieParser from 'cookie-parser';
+
 import corsOptions from './config/corsOptions.js';
-// import { allowedOrigins } from './config/corsOptions.js';
+
 import postRoutes from './routes/posts.js';
 import userRoutes from './routes/users.js';
 
@@ -21,14 +21,15 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(cors(corsOptions));
 
-
 app.use(express.json());
+
+app.use(cookieParser());
+
 app.use(express.urlencoded({ extended: false }));
 
 app.use(bodyParser.json({ limit: '30mb', extended: true }));
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }));
 
-app.use(cookieParser());
 
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
