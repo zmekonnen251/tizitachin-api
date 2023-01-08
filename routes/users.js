@@ -5,6 +5,7 @@ import {
 	signout,
 	googleSignin,
 	verifyEmail,
+	refresh,
 } from '../controllers/users.js';
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.get('/signout', signout);
 router.post('/google', googleSignin);
 
 router.get('/:id/confirmation/:token', verifyEmail);
+router.get('/refresh', refresh);
 
 export default router;

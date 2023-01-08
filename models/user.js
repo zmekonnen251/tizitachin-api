@@ -7,7 +7,6 @@ const userSchema = mongoose.Schema({
 	imageUrl: { type: String, required: false },
 	verified: { type: Boolean, default: true },
 	refreshToken: { type: String },
-	id: { type: String },
 });
 
 export default mongoose.model('User', userSchema);

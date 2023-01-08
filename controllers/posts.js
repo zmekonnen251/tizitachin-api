@@ -16,7 +16,7 @@ export const getPost = async (req, res) => {
 export const getPosts = async (req, res) => {
 	const { page } = req.query;
 	try {
-		const LIMIT = 8;
+		const LIMIT = 9;
 		const startIndex = (Number(page) - 1) * LIMIT; // get the starting index of every page
 		const total = await PostMessage.countDocuments({});
 		const posts = await PostMessage.find()
@@ -36,14 +36,22 @@ export const getPosts = async (req, res) => {
 
 export const getPostsBySearch = async (req, res) => {
 	const { searchQuery, tags } = req.query;
+	console.log('searchQuery', searchQuery);
+	console.log('tags', tags);
 	try {
 		const title = new RegExp(searchQuery, 'i');
+		if (tags === '') {
+			const posts = await PostMessage.find({ title });
+			return res.status(200).json({ data: posts });
+		}
+
 		const posts = await PostMessage.find({
 			$or: [{ title }, { tags: { $in: tags.split(',') } }],
 		});
 
 		res.status(200).json({ data: posts });
 	} catch (error) {
+		console.log(error);
 		res.status(404).json({ message: error.message });
 	}
 };
@@ -53,14 +61,14 @@ export const createPost = async (req, res) => {
 
 	const newPost = new PostMessage({
 		...post,
-		creator: req.userId,
+		creator: req.currentUser._id,
 		createdAt: new Date().toISOString(),
 	});
 
 	try {
 		await newPost.save();
 
-		res.status(201).json(newPost);
+		res.status(200).json(newPost);
 	} catch (error) {
 		res.status(409).json({ message: error.message });
 	}
@@ -73,11 +81,14 @@ export const updatePost = async (req, res) => {
 	if (!mongoose.Types.ObjectId.isValid(id))
 		return res.status(404).send('No post with that id');
 
+	if (post.creator !== req.currentUser._id)
+		return res.status(403).send('You are not allowed to update this post');
+
 	const updatedPost = await PostMessage.findByIdAndUpdate(id, post, {
 		new: true,
 	});
 
-	res.json(updatePost);
+	res.status(200).json(updatedPost);
 };
 
 export const deletePost = async (req, res) => {
@@ -85,6 +96,11 @@ export const deletePost = async (req, res) => {
 
 	if (!mongoose.Types.ObjectId.isValid(id))
 		return res.status(404).send('No post with that id');
+
+	const post = await PostMessage.findById(id);
+
+	if (post.creator !== req.currentUser._id)
+		return res.status(403).send('You are not allowed to delete this post');
 
 	await PostMessage.findByIdAndRemove(id);
 
@@ -94,28 +110,30 @@ export const deletePost = async (req, res) => {
 export const likePost = async (req, res) => {
 	const { id } = req.params;
 
-	if (!req.userId) return res.json({ message: 'Unauthenticated' });
+	if (!req.currentUser) return res.json({ message: 'Unauthenticated' });
 
 	if (!mongoose.Types.ObjectId.isValid(id))
 		return res.status(404).send('No post with that id');
 
 	const post = await PostMessage.findById(id);
 
-	const index = post.likes.findIndex((id) => id === String(req.userId));
+	const index = post.likes.findIndex(
+		(id) => id === String(req.currentUser._id)
+	);
 
 	if (index === -1) {
 		// like the post
-		post.likes.push(req.userId);
+		post.likes.push(req.currentUser._id);
 	} else {
 		// dislike a post
-		post.likes = post.likes.filter((id) => id !== String(req.userId));
+		post.likes = post.likes.filter((id) => id !== String(req.currentUser._id));
 	}
 
 	const updatedPost = await PostMessage.findByIdAndUpdate(id, post, {
 		new: true,
 	});
 
-	res.json(updatedPost);
+	res.status(200).json(updatedPost);
 };
 
 export const commentPost = async (req, res) => {
@@ -130,5 +148,5 @@ export const commentPost = async (req, res) => {
 		new: true,
 	});
 
-	res.json(updatedPost);
+	res.status(200).json(updatedPost);
 };

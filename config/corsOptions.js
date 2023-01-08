@@ -12,6 +12,7 @@ export default {
 		'https://tizitachin-client.onrender.com',
 		'https://tizitachin.netlify.app',
 		undefined,
+		'http://localhost:3000',
 	],
 	credentials: true,
 	optionsSuccessStatus: 200,

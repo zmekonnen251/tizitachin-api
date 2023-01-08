@@ -202,11 +202,11 @@ export const googleSignin = async (req, res) => {
 				email: user.email,
 				name: user.name,
 				imageUrl: user.imageUrl,
-				id: user._id,
+				_id: user._id,
 			});
 			const refreshToken = generateRefreshToken({
 				email: user.email,
-				id: user._id,
+				_id: user._id,
 			});
 
 			res.cookie('jwt', refreshToken, {
@@ -280,52 +280,74 @@ export const googleSignin = async (req, res) => {
 };
 
 export const signout = async (req, res) => {
-	const cookies = req.cookies;
+	const cookies = req?.cookies;
+	console.log(cookies);
 
 	if (!cookies?.jwt) return res.status(204);
 
 	const refreshToken = cookies.jwt;
 
-	jwt.verify(
-		refreshToken,
-		process.env.REFRESH_TOKEN_SECRET,
+	const foundUser = await User.findOne({ refreshToken });
 
-		async (err, decodedUser) => {
-			if (err) return res.status(403).json({ message: 'Forbiden' });
+	if (!foundUser) return res.status(204);
 
-			const foundUser = await User.findOne({ refreshToken });
+	await foundUser.updateOne({ refreshToken: '' });
 
-			if (!foundUser) return res.status(403).json({ message: 'Forbiden' });
+	res.clearCookie('jwt', {
+		httpOnly: true,
+		secure: true,
+		sameSite: 'None',
+	});
 
-			if (String(foundUser._id) !== decodedUser._id)
-				return res.status(403).json({ message: 'Forbiden' });
+	res.clearCookie('access-token', {
+		httpOnly: false,
+		secure: true,
+		sameSite: 'None',
+	});
 
-			await User.findOneAndUpdate(
-				{ refreshToken },
-				{ refreshToken: '' },
-				{ new: true }
-			);
-
-			res.clearCookie('jwt', {
-				httpOnly: true,
-				sameSite: 'None',
-				secure: true,
-			});
-
-			res.clearCookie('access-token', {
-				httpOnly: false,
-				sameSite: 'None',
-				secure: true,
-			});
-			// res.clearCookie('jwt');
-			// res.clearCookie('access-token');
-			// res.cookie('jwt', 'loggedout');
-			// res.cookie('access-token', 'loggedout');
-
-			res.status(204).json({ message: 'User signed out successfully' });
-		}
-	);
+	res.status(200).json({ message: 'Signout successfully' });
 };
+
+// 	jwt.verify(
+// 		refreshToken,
+// 		process.env.REFRESH_TOKEN_SECRET,
+
+// 		async (err, decodedUser) => {
+// 			if (err) return res.status(403).json({ message: 'Forbiden' });
+
+// 			const foundUser = await User.findOne({ refreshToken });
+
+// 			if (!foundUser) return res.status(403).json({ message: 'Forbiden' });
+
+// 			if (String(foundUser._id) !== decodedUser._id)
+// 				return res.status(403).json({ message: 'Forbiden' });
+
+// 			await User.findOneAndUpdate(
+// 				{ refreshToken },
+// 				{ refreshToken: '' },
+// 				{ new: true }
+// 			);
+
+// 			res.clearCookie('jwt', {
+// 				httpOnly: true,
+// 				sameSite: 'None',
+// 				secure: true,
+// 			});
+
+// 			res.clearCookie('access-token', {
+// 				httpOnly: false,
+// 				sameSite: 'None',
+// 				secure: true,
+// 			});
+// 			// res.clearCookie('jwt');
+// 			// res.clearCookie('access-token');
+// 			// res.cookie('jwt', 'loggedout');
+// 			// res.cookie('access-token', 'loggedout');
+
+// 			res.status(204).json({ message: 'User signed out successfully' });
+// 		}
+// 	);
+// };
 
 export const verifyEmail = async (req, res) => {
 	const { id, token } = req.params;
@@ -343,10 +365,10 @@ export const verifyEmail = async (req, res) => {
 
 		if (!_token) return res.status(404).json({ message: 'Token not found' });
 
-		if (_token.userId.toString() !== user._id.toString())
+		if (_token.userId.toString() !== user.id.toString())
 			return res.status(401).json({ message: 'Unauthorized' });
 
-		await User.updateOne({ _id: user._id }, { verified: true });
+		await User.findByIdAndUpdate(user._id, { verified: true });
 
 		await _token.delete();
 
@@ -357,73 +379,84 @@ export const verifyEmail = async (req, res) => {
 };
 
 export const protect = async (req, res, next) => {
-	console.log(req.cookies);
-	console.log(req.headers.authorization);
-	const refreshToken = req.cookies['jwt'];
-	let accessToken = '';
-	if (
-		req.headers.authorization &&
-		req.headers.authorization.startsWith('Bearer')
-	) {
-		accessToken = req.headers.authorization.split(' ')[1];
-		console.log(accessToken);
+	try {
+		if (
+			!req.headers.authorization ||
+			!req.headers.authorization.startsWith('Bearer')
+		) {
+			return res.status(401).json({ message: 'Unauthorized' });
+		}
+
+		const accessToken = req.headers.authorization.split(' ')[1];
+		const refreshToken = req?.cookies?.jwt;
+		const accessTokenCookie = req?.cookies?.['access-token'];
+
+		const decodedUser = jwt.verify(
+			accessToken,
+			process.env.ACCESS_TOKEN_SECRET
+		);
+
+		const foundUser = await User.findById(decodedUser._id);
+
+		if (!foundUser) return res.status(401).json({ message: 'Unauthorized' });
+
+		if (foundUser.refreshToken !== refreshToken)
+			return res.status(401).json({ message: 'Unauthorized' });
+
+		if (accessTokenCookie !== accessToken)
+			return res.status(401).json({ message: 'Unauthorized' });
+
+		req.currentUser = decodedUser;
+
+		next();
+	} catch (err) {
+		res.status(401).json({ message: 'jwt expired' });
 	}
-	if (!refreshToken || !accessToken) {
-		return res.status(401).json({ message: 'Unauthorized' });
-	}
+};
+
+export const refresh = async (req, res) => {
+	const cookies = req.cookies;
+	if (!cookies?.jwt) return res.status(403).json({ message: 'Forbiden' });
+
+	const refreshToken = cookies.jwt;
 
 	jwt.verify(
-		accessToken,
-		process.env.ACCESS_TOKEN_SECRET,
+		refreshToken,
+		process.env.REFRESH_TOKEN_SECRET,
 		async (err, decodedUser) => {
-			if (err) {
-				jwt.verify(
-					refreshToken,
-					process.env.REFRESH_TOKEN_SECRET,
-					async (err, decodedUser) => {
-						if (err) {
-							return res.status(403).json({ message: 'Forbiden' });
-						}
+			if (err) return res.status(403).json({ message: 'Forbiden' });
 
-						const foundUser = await User.findOne({ refreshToken }).select(
-							'-password'
-						);
+			const foundUser = await User.findOne({ refreshToken });
 
-						if (!foundUser)
-							return res.status(403).json({ message: 'Forbiden' });
+			if (!foundUser) return res.status(403).json({ message: 'Forbiden' });
 
-						if (String(foundUser._id) !== decodedUser._id)
-							return res.status(403).json({ message: 'Forbiden' });
+			if (foundUser.id !== decodedUser._id)
+				return res.status(403).json({ message: 'Forbiden' });
 
-						const newAccessToken = generateAccessToken({
-							email: decodedUser.email,
-							name: foundUser.name,
-							imageUrl: foundUser.imageUrl,
-							_id: decodedUser._id,
-						});
+			const newAccessToken = generateAccessToken({
+				email: decodedUser.email,
+				name: foundUser.name,
+				imageUrl: foundUser.imageUrl,
+				_id: decodedUser._id,
+			});
 
-						req.userId = decodedUser._id;
+			res.cookie('access-token', newAccessToken, {
+				httpOnly: false,
+				secure: true,
+				sameSite: 'None',
+				maxAge: 15 * 60 * 1000,
+			});
 
-						res.cookie('access-token', newAccessToken, {
-							httpOnly: false,
-							secure: true,
-							sameSite: 'None',
-							maxAge: 15 * 60 * 1000,
-						});
-
-						res.status(200).json({
-							user: {
-								name: foundUser.name,
-								email: foundUser.email,
-								_id: foundUser._id,
-							},
-						});
-					}
-				);
-			} else {
-				req.userId = decodedUser._id;
-			}
+			res.status(200).json({
+				message: 'Refreshed',
+				user: {
+					name: foundUser.name,
+					email: foundUser.email,
+					imageUrl: foundUser.imageUrl,
+					_id: foundUser.id,
+				},
+				accessToken: newAccessToken,
+			});
 		}
 	);
-	next();
 };
