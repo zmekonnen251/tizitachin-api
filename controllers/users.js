@@ -124,8 +124,7 @@ export const signup = async (req, res) => {
 			token: crypto.randomBytes(16).toString('hex'),
 		});
 
-		// const url = `${process.env.FRONT_END_URL}/users/${result._id}/confirmation/${token.token}`;
-		const url = '';
+		const url = `${process.env.FRONTEND_URL}/users/${result.id}/confirmation/${token.token}`;
 
 		await new Email(result, url).sendWelcome();
 
@@ -308,46 +307,6 @@ export const signout = async (req, res) => {
 	res.status(200).json({ message: 'Signout successfully' });
 };
 
-// 	jwt.verify(
-// 		refreshToken,
-// 		process.env.REFRESH_TOKEN_SECRET,
-
-// 		async (err, decodedUser) => {
-// 			if (err) return res.status(403).json({ message: 'Forbiden' });
-
-// 			const foundUser = await User.findOne({ refreshToken });
-
-// 			if (!foundUser) return res.status(403).json({ message: 'Forbiden' });
-
-// 			if (String(foundUser._id) !== decodedUser._id)
-// 				return res.status(403).json({ message: 'Forbiden' });
-
-// 			await User.findOneAndUpdate(
-// 				{ refreshToken },
-// 				{ refreshToken: '' },
-// 				{ new: true }
-// 			);
-
-// 			res.clearCookie('jwt', {
-// 				httpOnly: true,
-// 				sameSite: 'None',
-// 				secure: true,
-// 			});
-
-// 			res.clearCookie('access-token', {
-// 				httpOnly: false,
-// 				sameSite: 'None',
-// 				secure: true,
-// 			});
-// 			// res.clearCookie('jwt');
-// 			// res.clearCookie('access-token');
-// 			// res.cookie('jwt', 'loggedout');
-// 			// res.cookie('access-token', 'loggedout');
-
-// 			res.status(204).json({ message: 'User signed out successfully' });
-// 		}
-// 	);
-// };
 
 export const verifyEmail = async (req, res) => {
 	const { id, token } = req.params;

@@ -1,19 +1,8 @@
-import allowedOrigins from './allowedOrigins.js';
+import { config } from 'dotenv';
+config();
 
 export default {
-	// origin: (origin, callback) => {
-	// 	if (allowedOrigins.indexOf(origin) !== -1) {
-	// 		callback(null, true);
-	// 	} else {
-	// 		callback(new Error('Not allowed by CORS'));
-	// 	}
-	// },
-	origin: [
-		'https://tizitachin-client.onrender.com',
-		'https://tizitachin.netlify.app',
-		undefined,
-		'http://localhost:3000',
-	],
+	origin: [...process.env.ALLOWED_ORIGINS.split(','), undefined],
 	credentials: true,
 	optionsSuccessStatus: 200,
 };

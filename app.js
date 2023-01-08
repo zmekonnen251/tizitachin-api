@@ -10,7 +10,6 @@ import corsOptions from './config/corsOptions.js';
 import postRoutes from './routes/posts.js';
 import userRoutes from './routes/users.js';
 
-
 dotenv.config();
 
 const app = express();
@@ -19,6 +18,7 @@ if (process.env.NODE_ENV === 'development') {
 	app.use(morgan('dev'));
 }
 
+console.log('corsOptions: ', corsOptions);
 app.use(cors(corsOptions));
 
 app.use(express.json());
@@ -29,7 +29,6 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(bodyParser.json({ limit: '30mb', extended: true }));
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }));
-
 
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
