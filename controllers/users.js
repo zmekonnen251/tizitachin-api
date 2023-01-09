@@ -124,7 +124,7 @@ export const signup = async (req, res) => {
 			token: crypto.randomBytes(16).toString('hex'),
 		});
 
-		const url = `${process.env.FRONTEND_URL}/users/${result.id}/confirmation/${token.token}`;
+		const url = `${process.env.BASE_URL}/users/${result.id}/confirmation/${token.token}`;
 
 		await new Email(result, url).sendEmailVerification();
 
