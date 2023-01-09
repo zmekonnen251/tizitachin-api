@@ -126,11 +126,11 @@ export const signup = async (req, res) => {
 
 		const url = `${process.env.FRONTEND_URL}/users/${result.id}/confirmation/${token.token}`;
 
-		await new Email(result, url).sendWelcome();
+		await new Email(result, url).sendEmailVerification();
 
-		// res.status(200).json({
-		// 	message: 'An email has been sent to you. Please verify your account',
-		// });
+		res.status(200).json({
+			message: 'An email has been sent to you. Please verify your account',
+		});
 
 		const accessToken = generateAccessToken({
 			email: result.email,
