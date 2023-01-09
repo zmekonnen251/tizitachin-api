@@ -38,4 +38,8 @@ app.use('/api/users', userRoutes);
 // 	res.send('Hello to Memories API');
 // });
 
+app.get('/*', (req, res) => {
+	res.sendFile('index.html', { root: 'react-client/build' });
+});
+
 export default app;
