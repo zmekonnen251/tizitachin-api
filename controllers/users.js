@@ -280,7 +280,6 @@ export const googleSignin = async (req, res) => {
 
 export const signout = async (req, res) => {
 	const cookies = req?.cookies;
-	console.log(cookies);
 
 	if (!cookies?.jwt) return res.status(204);
 
@@ -306,7 +305,6 @@ export const signout = async (req, res) => {
 
 	res.status(200).json({ message: 'Signout successfully' });
 };
-
 
 export const verifyEmail = async (req, res) => {
 	const { id, token } = req.params;

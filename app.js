@@ -14,12 +14,13 @@ dotenv.config();
 
 const app = express();
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'development') {
 	app.use(morgan('dev'));
 }
 
-console.log('corsOptions: ', corsOptions);
 app.use(cors(corsOptions));
+
+app.use(express.static('react-client/build'));
 
 app.use(express.json());
 
@@ -33,8 +34,8 @@ app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }));
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 
-app.get('/', (req, res) => {
-	res.send('Hello to Memories API');
-});
+// app.get('/', (req, res) => {
+// 	res.send('Hello to Memories API');
+// });
 
 export default app;
